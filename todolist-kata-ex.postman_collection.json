@@ -1,0 +1,141 @@
+{
+	"info": {
+		"_postman_id": "5dbd4158-0ab6-4d41-bd4e-e99b94aae21c",
+		"name": "todolist-kata-ex",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "getpost",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://fast-waters-04649.herokuapp.com/posts",
+					"protocol": "https",
+					"host": [
+						"fast-waters-04649",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"posts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OPTION",
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"url": {
+					"raw": "127.0.0.1:3000/",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"content\": \"寶可夢2內容\",\r\n    \"name\": \"寶可夢2\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://fast-waters-04649.herokuapp.com/posts",
+					"protocol": "https",
+					"host": [
+						"fast-waters-04649",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"posts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://fast-waters-04649.herokuapp.com/posts/62734ab33bfc0860f0c3717a",
+					"protocol": "https",
+					"host": [
+						"fast-waters-04649",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"posts",
+						"62734ab33bfc0860f0c3717a"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UPDATE",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"content\": \"寶可夢2內容 - modify\",\r\n    \"name\": \"寶可夢2 - modify\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://fast-waters-04649.herokuapp.com/posts/",
+					"protocol": "https",
+					"host": [
+						"fast-waters-04649",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"posts",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

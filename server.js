@@ -4,7 +4,7 @@ const Post = require('./models/post');
 const dotenv = require('dotenv');
 
 dotenv.config({ path: "./config.env" });
-const DB = process.env.DATABASE.replace(
+const DB = process.env.DB.replace(
     '<password>',
     process.env.DB_PASSWORD
 );

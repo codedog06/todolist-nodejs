@@ -2,8 +2,10 @@ const http = require('http');
 const mongoose = require('mongoose');
 const Post = require('./models/post');
 const dotenv = require('dotenv');
+const { errHandle, successHandle } = require('./models/responseHandle');
 
 dotenv.config({ path: "./config.env" });
+console.log(process.env)
 const DB = process.env.DB.replace(
     '<password>',
     process.env.DB_PASSWORD
@@ -11,104 +13,87 @@ const DB = process.env.DB.replace(
 mongoose
     .connect(DB)
     .then(() => console.log('資料庫連接成功'))
-    .catch((err) => console.log(err));
 
-const requestListener = async(req, res) => {
+const requestListener = async (req, res) => {
     let body = '';
     req.on('data', chunk => {
         body += chunk
     });
 
-    const headers = {
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Content-Length, X-Requested-With',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'PATCH, POST, GET,OPTIONS,DELETE',
-        'Content-Type': 'application/json'
-    }
-
     if (req.url == '/posts' && req.method == 'GET') {
         const posts = await Post.find();
-        res.writeHead(200, headers);
-        res.write(JSON.stringify({
-            'status': 'success',
-            posts
-        }));
-        res.end();
+        successHandle(res, posts);
     } else if (req.url == '/posts' && req.method == 'POST') {
-        req.on('end', async() => {
+        req.on('end', async () => {
             try {
                 const data = JSON.parse(body);
-                const newPost = await Post.create({
-                    "content": data.content,
-                    "image": data.image,
-                    "name": data.name,
-                    "like": 0
-                });
-                res.writeHead(200, headers);
-                res.write(JSON.stringify({
-                    'status': 'success',
-                    posts: newPost
-                }));
-                res.end();
+                if (!data.content == '' && !data.name == '') {
+                    const newPost = await Post.create({
+                        "content": data.content,
+                        "image": data.image,
+                        "name": data.name,
+                        "like": 0
+                    });
+                    successHandle(res, newPost);
+                } else {
+                    errHandle(res, 400, 'content and name can not blank');
+                }
             } catch (error) {
-                res.writeHead(400, headers);
-                res.write(JSON.stringify({
-                    'status': 'false',
-                    'message': 'input fleid error or ID not correct',
-                    'error': error
-                }))
-                res.end();
+                errHandle(res, 400, 'input fleid error or ID not correct');
             }
         });
     } else if (req.url == '/posts' && req.method == 'DELETE') {
         await Post.deleteMany({});
-        res.writeHead(200, headers);
-        res.write(JSON.stringify({
-            'status': 'success',
-        }));
-        res.end();
+        successHandle(res);
     } else if (req.url.startsWith('/posts/') && req.method == 'DELETE') {
-        const id = req.url.split('/').pop();
-        const posts = await Post.findByIdAndDelete(id);
-        res.writeHead(200, headers);
-        res.write(JSON.stringify({
-            'status': 'success',
-            'message': id + 'deleted' + posts
-        }));
-        res.end();
+        try {
+            // 先取ID
+            const id = req.url.split('/').pop();
+            // 檢查id是否存在
+            const user = await Post.findOne({ _id: id }).lean();
+            if (user) {
+                const posts = await Post.findByIdAndDelete(id);
+                successHandle(res, posts);
+            } else {
+                errHandle(res, 400, 'ID不存在');
+            }
+        } catch (error) {
+            errHandle(res, 400, error);
+        }
     } else if (req.url.startsWith('/posts/') && req.method == 'PATCH') {
-        req.on('end', async() => {
+        req.on('end', async () => {
             try {
                 const data = JSON.parse(body);
+                // 先取ID
                 const id = req.url.split('/').pop();
-                const updatePost = await Post.findByIdAndUpdate(id, {
-                        $set: {
-                            name: data.name,
-                            content: data.content
-                        }
-                    }, { new: true })
-                    .then(() => { console.log('update success') })
-                    .catch((err) => { console.log(err) });
-                res.writeHead(200, headers);
-                res.write(JSON.stringify({
-                    'status': 'success',
-                    updatePost
-                }));
-                res.end();
+                // 檢查id是否存在
+                const user = await Post.findOne({ _id: id }).lean();
+                // if id 存在
+                if (user) {
+                    // 判斷兩者輸入不能是空值
+                    if (!data.content == '' || !data.name == '') {
+                        const updatePost = await Post.findByIdAndUpdate(id, {
+                            $set: {
+                                content: data.content,
+                                name: data.name
+                            }
+                        }, { new: true, runValidators: true });
+                        successHandle(res, updatePost);
+                    } else {
+                        errHandle(res, 400, 'content or name cannot input null ');
+                    }
+                } else {
+                    errHandle(res, 400, 'ID不存在');
+                }
             } catch (error) {
-                console.log(error);
-                res.end();
+                errHandle(res, 400, error);
             }
         });
     } else if (req.url == '/' && req.method == 'OPTIONS') {
         res.writeHead(200, headers);
         res.end();
     } else {
-        res.writeHead(404, headers);
-        res.write(JSON.stringify({
-            'status': 'false',
-            'message': 'Route not exist'
-        }));
+        errHandle(res, 404, 'Route not exist')
     }
 }
 

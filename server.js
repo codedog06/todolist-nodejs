@@ -2,7 +2,7 @@ const http = require('http');
 const mongoose = require('mongoose');
 const Post = require('./models/post');
 const dotenv = require('dotenv');
-const { errHandle, successHandle } = require('./models/responseHandle');
+const { errHandle, successHandle } = require('./utils/responseHandle');
 
 dotenv.config({ path: "./config.env" });
 console.log(process.env)
@@ -10,12 +10,13 @@ const DB = process.env.DB.replace(
     '<password>',
     process.env.DB_PASSWORD
 );
+
 try {
     mongoose
         .connect(DB)
         .then(() => console.log('資料庫連接成功'))
 } catch (error) {
-    console.log(error);
+    console.log(error)
 }
 
 const requestListener = async(req, res) => {

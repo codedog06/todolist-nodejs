@@ -10,11 +10,15 @@ const DB = process.env.DB.replace(
     '<password>',
     process.env.DB_PASSWORD
 );
-mongoose
-    .connect(DB)
-    .then(() => console.log('資料庫連接成功'))
+try {
+    mongoose
+        .connect(DB)
+        .then(() => console.log('資料庫連接成功'))
+} catch (error) {
+    console.log(error);
+}
 
-const requestListener = async (req, res) => {
+const requestListener = async(req, res) => {
     let body = '';
     req.on('data', chunk => {
         body += chunk
@@ -24,7 +28,7 @@ const requestListener = async (req, res) => {
         const posts = await Post.find();
         successHandle(res, posts);
     } else if (req.url == '/posts' && req.method == 'POST') {
-        req.on('end', async () => {
+        req.on('end', async() => {
             try {
                 const data = JSON.parse(body);
                 if (!data.content == '' && !data.name == '') {
@@ -39,7 +43,7 @@ const requestListener = async (req, res) => {
                     errHandle(res, 400, 'content and name can not blank');
                 }
             } catch (error) {
-                errHandle(res, 400, 'input fleid error or ID not correct');
+                errHandle(res, 400, 'input field error or ID not correct');
             }
         });
     } else if (req.url == '/posts' && req.method == 'DELETE') {
@@ -61,7 +65,7 @@ const requestListener = async (req, res) => {
             errHandle(res, 400, error);
         }
     } else if (req.url.startsWith('/posts/') && req.method == 'PATCH') {
-        req.on('end', async () => {
+        req.on('end', async() => {
             try {
                 const data = JSON.parse(body);
                 // 先取ID
